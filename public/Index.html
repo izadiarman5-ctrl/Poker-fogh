@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Poker</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      background-color: #0f380f;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .poker-table {
+      border: 8px solid #8b4513;
+      background: #1e5a1e;
+      border-radius: 100px;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 400px;
+    }
+    .cards { font-size: 24px; font-weight: bold; color: #ffd700; margin: 10px 0; }
+    .btn {
+      background: #2ea44f;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎲 مینی‌اپ پوکر تلگرام</h2>
+  <div class="poker-table">
+    <div>پت (Pot): <span id="pot">0</span> چیپ</div>
+    <hr>
+    <div>کارت‌های روی میز:</div>
+    <div class="cards" id="communityCards">-</div>
+    <hr>
+    <div>کارت‌های شما:</div>
+    <div class="cards" id="myCards">-</div>
+  </div>
+
+  <button class="btn" onclick="startGame()">شروع دست جدید</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const socket = io();
+
+    socket.on('stateUpdate', (state) => {
+      document.getElementById('pot').innerText = state.pot;
+      
+      if (state.communityCards.length > 0) {
+        document.getElementById('communityCards').innerText = state.communityCards.join(' ');
+      }
+
+      if (state.players[socket.id] && state.players[socket.id].cards.length > 0) {
+        document.getElementById('myCards').innerText = state.players[socket.id].cards.join(' ');
+      }
+    });
+
+    function startGame() {
+      socket.emit('startGame');
+    }
+  </script>
+</body>
+</html>
